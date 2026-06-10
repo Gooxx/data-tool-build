@@ -1,0 +1,30 @@
+name: 构建 Windows 可执行文件
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: 签出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: 安装依赖
+        run: pip install pandas openpyxl pyinstaller
+
+      - name: 打包为 .exe
+        run: pyinstaller --onefile --windowed --name "数据抽选工具" excel数据处理.py
+
+      - name: 上传产物
+        uses: actions/upload-artifact@v4
+        with:
+          name: 数据抽选工具-Windows
+          path: dist/数据抽选工具.exe
