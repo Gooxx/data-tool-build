@@ -31,13 +31,14 @@ class DataSamplerApp:
     def load_excel(self):
         file_path = filedialog.askopenfilename(
             title="选择 Excel 文件",
-            filetypes=[("Excel 文件", "*.xlsx *.xls"), ("所有文件", "*.*")]
+            filetypes=[("Excel 文件", "*.xlsx"), ("所有文件", "*.*")]   # 只保留 xlsx，如需要 xls 可保留但需确保打包 xlrd
         )
         if not file_path:
             return
 
         try:
-            self.df_original = pd.read_excel(file_path, header=None)
+            # 关键：强制使用 openpyxl 引擎读取，避免依赖 xlrd
+            self.df_original = pd.read_excel(file_path, header=None, engine='openpyxl')
             if self.df_original.shape[1] < 4:
                 messagebox.showerror("错误", "数据至少需要 4 列（时间、代码、数值1、数值2、数值3）")
                 return
@@ -130,7 +131,8 @@ class DataSamplerApp:
             return
 
         try:
-            self.df_result.to_excel(file_path, index=False, header=False)
+            # 导出时也指定引擎，保持一致性
+            self.df_result.to_excel(file_path, index=False, header=False, engine='openpyxl')
             messagebox.showinfo("成功", f"结果已保存至：\n{file_path}")
         except Exception as e:
             messagebox.showerror("保存失败", f"保存文件时出错：{str(e)}")
